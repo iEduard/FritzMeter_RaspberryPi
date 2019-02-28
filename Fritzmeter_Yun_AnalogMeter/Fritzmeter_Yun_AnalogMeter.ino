@@ -34,7 +34,6 @@
 #include <YunClient.h>
 #include <Bridge.h>
 #include <Process.h>
-//#include <DebugOutput.h>
 //#include <Console.h>
 
 // -----------------------------------
@@ -42,7 +41,7 @@
 // -----------------------------------
 #define MAX_STRING_LEN  35
 #define SWITCHING_TIME 3000
-//#define DEBUG_LEVEL 2   // 5 = netread() // 6 = serialevent() // 2 = 
+#define DEBUG_OUTPUT 0 // 0 = Serial connection // 1 = Console
 #define UPLOAD_ANALOG_PIN 9
 #define DOWNLOAD_ANALOG_PIN 10
 
@@ -92,9 +91,8 @@ unsigned long lastCycleTime = 0;
 // with the IP address and port of the server 
 YunClient client;
 
-// Debug Output Object
-//DebugOutput debugOutput;
-
+// Debug variables
+byte debugLevel = 0;
 
 // -----------------------------------
 // Setup of the Project
@@ -107,8 +105,17 @@ void setup(){
   Bridge.begin();
 
   // -------------------------------------
-  // start the Debug library:
-  // debugOutput.begin(DEBUG_CONSOLE,1);    // DEBUG_SERIAL DEBUG_CONSOLE
+  // Set the Debuglevel
+  bitSet(debugLevel, 0); // Connection status to the router
+  bitSet(debugLevel, 1); // Fritzbox TX and RX data
+  // bitSet(debugLevel, 2);
+  // bitSet(debugLevel, 3);
+  // bitSet(debugLevel, 4);  
+  // bitSet(debugLevel, 5);
+  // bitSet(debugLevel, 6);  
+  bitSet(debugLevel, 7); // Debug function msg. To check if the debug thing is working
+  // Start the debug output
+  DebugOutput(DEBUG_OUTPUT);
   
 
   // -------------------------------------
@@ -118,15 +125,15 @@ void setup(){
 
   // -------------------------------------
   // Set the Client TimeOut
+  bool _gateWayIpRecived = false;
   client.setTimeout(200);
 
-
-  while (GatewayIP==""){
-    GatewayIP = getGateway();
-    //debugOutput.println("No Gateway recived...", 200);
+  while (!_gateWayIpRecived){
+    _gateWayIpRecived = setRouterIp();
+    println("No gateway recived...", 0);
     delay(3000);
   }
-
+  
   // Get the Current Value and set the buffer Value
   nrbl_lastCycle = nrbl;
   nsbl_lastCycle = nsbl;
@@ -142,7 +149,7 @@ void setup(){
 void loop(){
      
   // Check if we need to change the Display-Information  
-  if (((lastCycleTime + SWITCHING_TIME) < millis()) ||  ((lastCycleTime) > millis())){
+  if (((lastCycleTime + SWITCHING_TIME) < millis()) || ((lastCycleTime) > millis())){
 
     
     // Call the xml Processor to obtain currently used bandwidth
@@ -155,19 +162,19 @@ void loop(){
     // Info with the Current TX/RX Return from the Fr!tzBox
 
     //INFO over Serial Send Speed
-    //debugOutput.println("----------------------------------------------", 5);
-    //debugOutput.println("Unfiltered Data", 5);
-    //debugOutput.print("Fr!tzBox Total TX bits/s:", 5);
-    //debugOutput.println((String)nsbl, 5);
+    println("----------------------------------------------", 1);
+    println("Unfiltered Data", 1);
+    print("Fr!tzBox Total TX bits/s:", 1);
+    println((String)nsbl, 1);
   
     //INFO over Serial Receive Speed
-    //debugOutput.print("Fr!tzBox Total RX bits/s:", 5);
-    //debugOutput.println((String)nrbl, 5);
+    print("Fr!tzBox Total RX bits/s:", 1);
+    println((String)nrbl, 1);
 
-    //debugOutput.println("----------------------------------------------", 5);
-    //debugOutput.println("Aktueller Tick", 5);
-    //debugOutput.print("millis()", 5);
-    //debugOutput.println((String)millis(), 5);
+    //debugOutput.println("----------------------------------------------", 1);
+    println("Aktueller Tick", 1);
+    print("millis()", 1);
+    println((String)millis(), 1);
 
     //--------------------
     // Set the Downstream Rate
@@ -487,14 +494,17 @@ boolean matchTag (char* searchTag) {
 // -----------------------------------
 bool netread(int fselector){
 
+  println("---------------------------------", 0);
+  println("Start net read with Server: " + String(host_ip[0]) + ":" + String(host_ip[1]) + ":" + String(host_ip[2]) + ":" + String(host_ip[3]) , 0);
+  
   //----------------------------------------------------------
   // make the request to the server 
   if (client.connect(host_ip, 49000)) {
 
 
-      //debugOutput.println("---------------------------------", 230);
-      //debugOutput.println("SUCCESS: Connection to the Server established", 230);        
-      //debugOutput.print("Start sending Post Request...", 230);        
+      println("---------------------------------", 0);
+      println("SUCCESS: Connection to the Server established", 0);
+      print("Start sending Post Request...", 0);
       
 
       client.println("POST /igdupnp/control/WANCommonIFC1 HTTP/1.1\nHOST: " + GatewayIP + ":49000");
@@ -515,20 +525,20 @@ bool netread(int fselector){
     }
 
 
-    //debugOutput.println("Post request sent", 230);
+    println("Post request sent", 230);
     
 
   } 
   else {
     // no connection to the server
-    //debugOutput.println("FAILED: No Connection to the Server", 230);        
+    println("FAILED: No Connection to the Server", 0);
     return false;
   }
 
   //---------------------------------------------------------- 
   //wait for the server to answer
   while (!client.available()){
-    //debugOutput.println("Waiting for server...", 230);
+    println("Waiting for server...", 0);
     ;
   }
   
@@ -536,9 +546,9 @@ bool netread(int fselector){
   //get data
   while (client.available()){
 
-    //debugOutput.println("Start getting Post...", 230);
+    println("Start getting Post...", 0);
     serialEvent();
-    //debugOutput.println("Post Recived", 230);
+    println("Post Recived", 0);
 
   }
 
@@ -549,13 +559,13 @@ bool netread(int fselector){
   client.flush();
 
   // INFO
-  //debugOutput.println("", 230);
-  //debugOutput.print("Disconnecting...", 230);        
+  println("", 0);
+  print("Disconnecting...", 0);        
   
 
   client.stop();
   
-  //debugOutput.println("done.", 230);        
+  println("done.", 0);        
   
   client.flush();
 
@@ -565,15 +575,20 @@ bool netread(int fselector){
 
 
 // -----------------------------------
-// Get the Gateway IP
+// Get the gateway IP and set the gloabal variable
 // -----------------------------------
-String getGateway(){
+bool setRouterIp(){
 
   // Some Variables we need
   Process p;// Process Object
   int readValueInt = 0;
   char readValueChar;
   String gatewayIp = "";
+
+
+  int _firstDot = 0;
+  int _secondDot = 0;
+  int _thirdDot = 0;
   
   // This command line runs the WifiStatus script, (/usr/bin/pretty-wifi-info.lua), then
   // sends the result to the grep command to look for a line containing the word
@@ -591,12 +606,108 @@ String getGateway(){
     readValueChar = char(readValueInt);
 
     if(readValueInt == readValueChar){
+      
         gatewayIp += readValueChar; //Get the Data From the Terminal (The IP Adress of the Gateway (Our Fr!zbox))
     }
   }
 
-  // Return the Gateway IP Adress
-  return gatewayIp;
+  
+
+  // Get the first segment
+  _firstDot = GatewayIP.indexOf('.');
+  host_ip[0] = (byte)GatewayIP.substring(0, _firstDot).toInt();
+  println("First Byte of the IP: " + GatewayIP.substring(0, _firstDot), 0);
+
+  // Get the second segment
+  _secondDot = GatewayIP.indexOf('.', _firstDot + 1);
+  host_ip[1] = (byte)GatewayIP.substring(_firstDot + 1, _secondDot).toInt();
+  println("First Byte of the IP: " + GatewayIP.substring(_firstDot + 1, _secondDot), 0);
+
+  // Get the third segment
+  _thirdDot = GatewayIP.indexOf('.', _secondDot + 1);
+  host_ip[1] = (byte)GatewayIP.substring(_secondDot + 1, _thirdDot).toInt();
+  println("First Byte of the IP: " + GatewayIP.substring(_secondDot + 1, _thirdDot), 0);
+
+  // Get the fourth segment
+  host_ip[1] = (byte)GatewayIP.substring(_thirdDot + 1).toInt();
+  println("First Byte of the IP: " + GatewayIP.substring(_thirdDot + 1), 0);
+  
 }
 
+
+
+// -----------------------------------
+// Debug functions
+// -----------------------------------
+// Init the debug interface
+void DebugOutput(byte _outputSelect) {
+
+  switch (_outputSelect) {
+
+    // Serial connection on the USB
+    case 0:
+      Serial.begin(9600);
+      Serial.println("Serial connection started.");
+      break;
+
+    // Console connection for the debug seasion via network on the arduino yun
+    case 1:
+      Bridge.begin();
+      Console.begin();
+      while(!Console);  
+      Console.println("Console connection started.");
+      break;
+
+    // Defaulkt fallback  
+    default:
+      // Do nothing. no correct selection was made
+      break;
+  }
+}
+
+// print line
+void println(String _outputData , byte _debugLevel){
+
+  if(!(  (( bitRead(debugLevel, 0) == 1 ) && ( _debugLevel == 0 ))
+      || (( bitRead(debugLevel, 1) == 1 ) && ( _debugLevel == 1 ))
+      || (( bitRead(debugLevel, 2) == 1 ) && ( _debugLevel == 2 ))
+      || (( bitRead(debugLevel, 3) == 1 ) && ( _debugLevel == 3 ))
+      || (( bitRead(debugLevel, 4) == 1 ) && ( _debugLevel == 4 ))
+      || (( bitRead(debugLevel, 5) == 1 ) && ( _debugLevel == 5 ))
+      || (( bitRead(debugLevel, 6) == 1 ) && ( _debugLevel == 6 ))
+      || (( bitRead(debugLevel, 7) == 1 ) && ( _debugLevel == 7 )) )){
+    return;
+  }
+  
+  // put your main code here, to run repeatedly:
+  if(DEBUG_OUTPUT == 0){
+    Serial.println(_outputData);  
+  }
+  else{
+    Console.println(_outputData);
+  }
+}
+
+// print
+void print(String _outputData , byte _debugLevel){
+
+  if(!(  (( bitRead(debugLevel, 0) == 1 ) && ( _debugLevel == 0 ))
+      || (( bitRead(debugLevel, 1) == 1 ) && ( _debugLevel == 1 ))
+      || (( bitRead(debugLevel, 2) == 1 ) && ( _debugLevel == 2 ))
+      || (( bitRead(debugLevel, 3) == 1 ) && ( _debugLevel == 3 ))
+      || (( bitRead(debugLevel, 4) == 1 ) && ( _debugLevel == 4 ))
+      || (( bitRead(debugLevel, 5) == 1 ) && ( _debugLevel == 5 ))
+      || (( bitRead(debugLevel, 6) == 1 ) && ( _debugLevel == 6 ))
+      || (( bitRead(debugLevel, 7) == 1 ) && ( _debugLevel == 7 )) )){
+    return;
+  }
+
+  // put your main code here, to run repeatedly:
+  if(DEBUG_OUTPUT == 0){
+    Serial.print(_outputData);  
+  }
+  else{
+    Console.print(_outputData);
+  }
+}
  
