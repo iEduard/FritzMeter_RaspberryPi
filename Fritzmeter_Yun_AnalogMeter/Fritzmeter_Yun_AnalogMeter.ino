@@ -23,8 +23,8 @@
  * External Hardware: Pin 10: =>  Analog Voltmeters 0-5V // Showing the Download Value
  * 
  * 
- * Router: FRITZ!Box 6340 Cable (kbw)
- * Firmware: FRITZ!OS 06.04
+ * Router: FRITZ!Box 6590 Cable 
+ * Firmware: FRITZ!OS 07.02
  *
  */
 
@@ -50,7 +50,7 @@
 // -----------------------------------
 
 byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };// MAC address for controller.
-byte host_ip[] = {  192, 168, 0, 1 };// IP Adresse des Routers
+byte host_ip[] = {  192, 168, 178, 212 };// IP Adresse des Routers 192.168.178.49
 String GatewayIP = "";
 
 // most variables are global for convenience
@@ -107,8 +107,8 @@ void setup(){
   // -------------------------------------
   // Set the Debuglevel
   bitSet(debugLevel, 0); // Connection status to the router
-  bitSet(debugLevel, 1); // Fritzbox TX and RX data
-  // bitSet(debugLevel, 2);
+  bitSet(debugLevel, 1); // Filtered fritzbox TX and RX data 
+  bitSet(debugLevel, 2); // Raw fritzbox data
   // bitSet(debugLevel, 3);
   // bitSet(debugLevel, 4);  
   // bitSet(debugLevel, 5);
@@ -128,12 +128,16 @@ void setup(){
   bool _gateWayIpRecived = false;
   client.setTimeout(200);
 
+/*
   while (!_gateWayIpRecived){
     _gateWayIpRecived = setRouterIp();
-    println("No gateway recived...", 0);
-    delay(3000);
-  }
-  
+
+    if (!_gateWayIpRecived){
+      println("No gateway recived...", 0);
+      delay(3000);
+    }
+  }*/
+ 
   // Get the Current Value and set the buffer Value
   nrbl_lastCycle = nrbl;
   nsbl_lastCycle = nsbl;
@@ -399,23 +403,23 @@ void serialEvent() {
     // If a LF, process the line
     if (inChar == 10 ) {
 
-      //debugOutput.print("tagStr: ", 220);
-      //debugOutput.println(tagStr, 220);
-      //debugOutput.print("dataStr: ", 220);
-      //debugOutput.println(dataStr, 220);
+      print("tagStr: ", 2);
+      println(tagStr, 2);
+      print("dataStr: ", 2);
+      println(dataStr, 2);
 
       // Find specific tags and print data
 
       if (matchTag("<NewTotalBytesSent>")) {
-        //debugOutput.print("TX: ", 220);
-        //debugOutput.print(dataStr, 220);
+        print("TX: ", 2);
+        print(dataStr, 2);
         nsbl = strtoul(dataStr,NULL,0);
         nsbl=nsbl*8; //convert bytes to bits
       }
     
       if (matchTag("<NewTotalBytesReceived>")) {
-        //debugOutput.print("RX: ", 220);
-        //debugOutput.print(dataStr, 220);
+        print("RX: ", 2);
+        print(dataStr, 2);
         nrbl = strtoul(dataStr,NULL,0);
         nrbl=nrbl*8;  //mach bits
       }
@@ -494,38 +498,44 @@ boolean matchTag (char* searchTag) {
 // -----------------------------------
 bool netread(int fselector){
 
+  String _gatewayIP = "";
+
   println("---------------------------------", 0);
-  println("Start net read with Server: " + String(host_ip[0]) + ":" + String(host_ip[1]) + ":" + String(host_ip[2]) + ":" + String(host_ip[3]) , 0);
+
   
   //----------------------------------------------------------
   // make the request to the server 
   if (client.connect(host_ip, 49000)) {
 
-
-      println("---------------------------------", 0);
       println("SUCCESS: Connection to the Server established", 0);
       print("Start sending Post Request...", 0);
-      
 
-      client.println("POST /igdupnp/control/WANCommonIFC1 HTTP/1.1\nHOST: " + GatewayIP + ":49000");
+      _gatewayIP = String(host_ip[0]) + ":" + String(host_ip[1]) + ":" + String(host_ip[2]) + ":" + String(host_ip[3]);
+      println("Router ip as string for XML Post request: " + _gatewayIP , 0);
+
+      _gatewayIP = "192:168:178:1";
+
+      client.println("POST /igdupnp/control/WANCommonIFC1 HTTP/1.1\nHOST: " + _gatewayIP + ":49000");
     
     if(fselector == 1){
-      client.println("SOAPACTION: \"urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1#GetTotalBytesSent\"\nContent-Type: text/xml; charset=\"utf-8\"\nContent-Length: 285\n");
+      client.println("SOAPACTION: \"urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1#GetTotalBytesSent\"");
+      client.println("Content-Type: text/xml; charset=\"utf-8\"");
+      client.println("Content-Length: 287");
       client.print(F("<?xml version=\"1.0\" encodin=\"utf-8\"?>\n<s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" "));
       client.print(F("xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">\n<s:Body>\n<u:GetTotalBytesSent xmlns:u=\"urn:schemas-upnp-org:service:"));
-      client.println(F("WANCommonInterfaceConfig:1\" />\n</s:Body>\n</s:Envelope>\n"));
+      client.println(F("WANCommonInterfaceConfig:1\" />\n</s:Body>\n</s:Envelope>"));
     }
 
 
     if(fselector == 2){
-      client.println("SOAPACTION: \"urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1#GetTotalBytesReceived\"\nContent-Type: text/xml; charset=\"utf-8\"\nContent-Length: 289\n");
+      client.println("SOAPACTION: \"urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1#GetTotalBytesReceived\"\nContent-Type: text/xml; charset=\"utf-8\"\nContent-Length: 289");
       client.print(F("<?xml version=\"1.0\" encodin=\"utf-8\"?>\n<s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" "));
       client.print(F("xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">\n<s:Body>\n<u:GetTotalBytesReceived xmlns:u=\"urn:schemas-upnp-org:service:"));
-      client.println(F("WANCommonInterfaceConfig:1\" />\n</s:Body>\n</s:Envelope>\n"));
+      client.println(F("WANCommonInterfaceConfig:1\" />\n</s:Body>\n</s:Envelope>"));
     }
 
 
-    println("Post request sent", 230);
+    println("Post request sent", 0);
     
 
   } 
@@ -580,57 +590,50 @@ bool netread(int fselector){
 bool setRouterIp(){
 
   // Some Variables we need
-  Process p;// Process Object
-  int readValueInt = 0;
-  char readValueChar;
-  String gatewayIp = "";
+  Process _p;// Process Object
+  int _readValueInt = 0;
+  char _readValueChar;
+  String _gatewayIp = "";
 
-
-  int _firstDot = 0;
-  int _secondDot = 0;
-  int _thirdDot = 0;
-  
+  int _ipSegment = 0;
+  bool _retVal = false;
+    
   // This command line runs the WifiStatus script, (/usr/bin/pretty-wifi-info.lua), then
   // sends the result to the grep command to look for a line containing the word
   // "Signal:"  the result is passed to this sketch:
-  p.runShellCommand("route -n | grep '^0\\.0\\.\\0\\.0[ \\t]\\+[1-9][0-9]*\\.[1-9][0-9]*\\.[1-9][0-9]*\\.[1-9][0-9]*[ \\t]\\+0\\.0\\.0\\.0[ \\t]\\+[^ \\t]*G[^ \\t]*[ \\t]' | awk '{print $2}'");
-  p.runShellCommand("route -n | grep 'UG[ \\t]' | awk '{print $2}'");
+  _p.runShellCommand("route -n | grep '^0\\.0\\.\\0\\.0[ \\t]\\+[1-9][0-9]*\\.[1-9][0-9]*\\.[1-9][0-9]*\\.[1-9][0-9]*[ \\t]\\+0\\.0\\.0\\.0[ \\t]\\+[^ \\t]*G[^ \\t]*[ \\t]' | awk '{print $2}'");
+  _p.runShellCommand("route -n | grep 'UG[ \\t]' | awk '{print $2}'");
 
   // do nothing until the process finishes, so you get the whole output:
-  while (p.running());
+  while (_p.running());
 
   // Read command output. runShellCommand() should have passed the IP of the Gateway "xxx.xxx.xxx.xxx":
-  while (p.available()) {
+  while (_p.available()) {
 
-    readValueInt = p.read();
-    readValueChar = char(readValueInt);
+    _readValueInt = _p.read();
+    _readValueChar = char(_readValueInt);
 
-    if(readValueInt == readValueChar){
-      
-        gatewayIp += readValueChar; //Get the Data From the Terminal (The IP Adress of the Gateway (Our Fr!zbox))
+    if(_readValueInt == _readValueChar){
+      if (_readValueInt == 46) { // Check for the "."
+         host_ip[_ipSegment] = (byte)_gatewayIp.toInt();// Convert the ip segment to byte
+         _ipSegment++;// Increment the ip segment
+         _gatewayIp = "";// We have recived data so reset the streing for the next segment
+         _retVal = true;// We have recived some data so cross the fingers that the data is correct. and set the return value to true
+      }
+      else{
+        _gatewayIp += _readValueChar; //Get the Data From the Terminal (The IP Adress of the Gateway (Our Fr!zbox))        
+      }
     }
   }
 
-  
+  // Add the last Segment
+  host_ip[_ipSegment] = (byte)_gatewayIp.toInt();
 
-  // Get the first segment
-  _firstDot = GatewayIP.indexOf('.');
-  host_ip[0] = (byte)GatewayIP.substring(0, _firstDot).toInt();
-  println("First Byte of the IP: " + GatewayIP.substring(0, _firstDot), 0);
+  println("---------------------------------", 0);
+  println("Router ip found: " + String(host_ip[0]) + ":" + String(host_ip[1]) + ":" + String(host_ip[2]) + ":" + String(host_ip[3]) , 0);
 
-  // Get the second segment
-  _secondDot = GatewayIP.indexOf('.', _firstDot + 1);
-  host_ip[1] = (byte)GatewayIP.substring(_firstDot + 1, _secondDot).toInt();
-  println("First Byte of the IP: " + GatewayIP.substring(_firstDot + 1, _secondDot), 0);
 
-  // Get the third segment
-  _thirdDot = GatewayIP.indexOf('.', _secondDot + 1);
-  host_ip[1] = (byte)GatewayIP.substring(_secondDot + 1, _thirdDot).toInt();
-  println("First Byte of the IP: " + GatewayIP.substring(_secondDot + 1, _thirdDot), 0);
-
-  // Get the fourth segment
-  host_ip[1] = (byte)GatewayIP.substring(_thirdDot + 1).toInt();
-  println("First Byte of the IP: " + GatewayIP.substring(_thirdDot + 1), 0);
+  return _retVal;
   
 }
 
