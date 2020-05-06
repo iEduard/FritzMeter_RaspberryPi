@@ -34,6 +34,7 @@
 #include <YunClient.h>
 #include <Bridge.h>
 #include <Process.h>
+#include <tr064.h>
 //#include <Console.h>
 
 // -----------------------------------
@@ -46,7 +47,7 @@
 #define DOWNLOAD_ANALOG_PIN 10
 
 // -----------------------------------
-// Global Variables
+// Global variables
 // -----------------------------------
 
 byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };// MAC address for controller.
