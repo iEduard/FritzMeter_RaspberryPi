@@ -1,17 +1,33 @@
 # About
-This project originaly started here: https://github.com/reischle/fritzmeter
-The project was changed to be working with an Arduino Yun and the Wifi connection.
-Also the collection of the data from the fritzbox was changed.
-The motor control was removed in order to work with the analog outputs for the analog gauges used as hardware displays.
+Application used to show the current usage of teh up and downstream on two analog gauges
+
 
 ## Hardware
-- Arduino Yun 
-- 2 x Analog Gauges 0 - 5V
-- 
-
-## Functionality
-The Arduino requests the information of the used data for up and down load rate at the router. (Need to be an AVM Fr!tzBox)
-After transforming the data the two gauges will be set with the analog values 
 
 
+## Software
+
+The application written here is in python.
+
+### fritzconnection
+
+To connect with the fr!tz box routers we need an TR-064 libtrary to communicate. This Library can be used to retriev all needed informations drom the router.
+
+#### Installation
+
+To install the application use pip.
+
+> pip install fritzconnection
+
+### adafruit-circuitpython-mcp4725
+
+#### Installation
+
+To install the application use pip.
+
+> pip3 install adafruit-circuitpython-mcp4725
+
+#### Usage / Info 
+
+- GitHub: https://github.com/adafruit/Adafruit_CircuitPython_MCP4725
 
