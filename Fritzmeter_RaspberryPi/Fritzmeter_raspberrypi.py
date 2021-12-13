@@ -3,7 +3,7 @@ from fritzconnection.lib.fritzstatus import FritzStatus
 import board
 import busio
 import adafruit_mcp4725
-
+import threading
 
 def main():
     """Main programm"""
@@ -16,37 +16,54 @@ def main():
     i2c = busio.I2C(board.SCL, board.SDA)
     dacUpload = adafruit_mcp4725.MCP4725(i2c)
     dacDownload = adafruit_mcp4725.MCP4725(i2c, address=0x63)
-    tmpValueUploadOld = 0
-    tmpValueDownloadOld = 0
+    _valueUploadOld = 0
+    _valueDownloadOld = 0
 
     #Create an Fritz Status Object
     fc = FritzStatus(address='192.168.178.1', password="")
 
     blnLoopActive = True
+    _valueUploadOld = 0
+    _valueDownloadOld = 0
+    _valueUpload = 0
+    _valueDownload = 0
+    uploadTransitionThread = None
+    downlaodTransitionThread = None
+
 
     #Start the loop
     while blnLoopActive:
-        #transmission_rate: The upstream and downstream values as a tuple in bytes per second. Use this for periodical calling.
-        #print( "Upload: " + str(convertToMbps(fc.transmission_rate[0])) + "Mbps // Download: " + str(convertToMbps(fc.transmission_rate[1])) + "Mbps" )
+
+
+        try:
+            #Get the Transmission rate from tegh Fr!tz Router           
+            _transmissionRate = fc.transmission_rate
+
+            #Try to join the Thread if allready existing
+            if not (uploadTransitionThread is None): 
+                uploadTransitionThread.join()
+            if not (downlaodTransitionThread is None):
+                downlaodTransitionThread.join()
+
+            #Convert to value to set the do dac 
+            _valueUpload = convertToAnalogOutput(30, convertToMbps(_transmissionRate[0])) 
+            _valueDownload = convertToAnalogOutput(200, convertToMbps(_transmissionRate[1]))
+
+            #Create the threads to performane the transition of the analog gauges
+            uploadTransitionThread = threading.Thread(target=transition, args=(dacUpload, _valueUploadOld, _valueUpload, 0.8, "Upload",))
+            downlaodTransitionThread = threading.Thread(target=transition, args=(dacDownload, _valueDownloadOld, _valueDownload, 0.8, "Download",))
+
+            #Start the 
+            uploadTransitionThread.start()
+            downlaodTransitionThread.start()
+
+            #Save the current value 
+            _valueUploadOld = _valueUpload
+            _valueDownloadOld = _valueDownload
         
-        tmpValueUpload = convertToAnalogOutput(30, convertToMbps(fc.transmission_rate[0])) 
-        #print("Normalized Value upload: " + str(tmpNormalizedValueUpload))
-
-        tmpValueDownload = convertToAnalogOutput(200, convertToMbps(fc.transmission_rate[1])) 
-        #print("Normalized Value download: " + str(tmpNormalizedValueDownload))
-
-        #print("Normalized Upload: " + str(tmpValueUpload) + " Normalized Download: " + str(tmpValueDownload))
-        
-        #dacUpload.value = int(tmpValueUpload)
-        #dacDownload.value = int(tmpValueDownload)
-        transition(dacUpload, tmpValueUploadOld, tmpValueUpload, 0.5)
-        transition(dacDownload, tmpValueDownloadOld, tmpValueDownload, 0.5)
-
-        tmpValueUploadOld = tmpValueUpload
-        tmpValueDownloadOld = tmpValueDownload
-        blnLoopActive = True
-        #time.sleep(SLEEP_TIMER_SECONDS)
-
+        except:
+            blnLoopActive = False
+            print("Error occured. We will not try again.")
 
 def convertToAnalogOutput(maxMbps, currentMbps):
     """
@@ -76,7 +93,7 @@ def convertToMbps(bytesPerSeconds):
     return (bytesPerSeconds * 8)/1000000
 
 
-def transition(dac, lastValue, newValue, timneSpan):
+def transition(dac, currentValue, newValue, timneSpan, name):
     """
     transition between the analog values
     Do this to prevent jumping pointer
@@ -84,8 +101,7 @@ def transition(dac, lastValue, newValue, timneSpan):
 
     intItterations = timneSpan/0.1
     blnCountUp = False
-    currentValue = lastValue
-    #print("Iterations: " + str(intItterations) + "  " + str(currentValue) + " ")
+    lastValue = currentValue
 
     if (lastValue < newValue):
         blnCountUp = True
@@ -98,14 +114,15 @@ def transition(dac, lastValue, newValue, timneSpan):
 
     for idx in range(int(intItterations)):
 
-        #print(str(idx))
         if blnCountUp:
             currentValue = currentValue + valueDiff
         else:
             currentValue = currentValue - valueDiff
     
-        #print(str(currentValue))
+        #Set the Analog Value
         dac.value = int(currentValue)
+
+        #wait for 100 ms 
         time.sleep(0.1)
 
 
