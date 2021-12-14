@@ -1,5 +1,6 @@
 # About
-Application used to show the current usage of teh up and downstream on two analog gauges
+Application used to show the current usage of the up and downstream on two analog gauges
+
 
 
 ## Hardware
