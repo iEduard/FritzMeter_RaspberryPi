@@ -9,6 +9,7 @@ Application used to show the current usage of the up and downstream on two analo
 - 2x Adafruit MCP4725 12-Bit DAC Tutorial https://learn.adafruit.com/mcp4725-12-bit-dac-tutorial
 - 2x 5V Analog gauges
 
+![Sketch](./Hardware/Sketch.png)
 
 ## Software
 
