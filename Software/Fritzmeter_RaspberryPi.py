@@ -62,7 +62,8 @@ def main():
             _valueDownloadOld = _valueDownload
         
         except:
-            blnLoopActive = False
+            #Create an Fritz Status Object
+            fc = FritzStatus(address='192.168.178.1', password="")
             print("Error occured. We will not try again.")
 
 def convertToAnalogOutput(maxMbps, currentMbps):
