@@ -9,8 +9,8 @@ def main():
     """Main programm"""
 
     SLEEP_TIMER_SECONDS = 1
-    MAX_UPLOAD_MBPS = 20        #Maybe chose 50
-    MAX_DOWNLOAD_MBPS = 170     #Maybe chose 200
+    MAX_UPLOAD_MBPS = 30        #chose the right maximum upload speed depending on your connection
+    MAX_DOWNLOAD_MBPS = 200     #chose the right maximum download speed depending on your connection
 
     #initialize the I2C connection with the sensor
     i2c = busio.I2C(board.SCL, board.SDA)
