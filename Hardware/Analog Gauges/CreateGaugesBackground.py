@@ -5,7 +5,7 @@ import cairo
 import math
 
 
-def text(ctx, string, pos, theta = 0.0, face = 'Georgia', font_size = 18):
+def drawText(ctx, string, pos, theta = 0.0, face = 'Georgia', font_size = 18):
     ctx.save()
 
     # build up an appropriate font
@@ -51,7 +51,7 @@ def drawLine(context, startX, startY, radius, angle, lineLength, lineWidth, labe
 
 	#If the label is available write it on top of the line
 	if len(label) > 0:
-		text(context, label, (startX - delta_x2, startY - delta_y2), (2 * math.pi) - angle, "Georgia", 16)
+		drawText(context, label, (startX - delta_x2, startY - delta_y2), (2 * math.pi) - angle, "Georgia", 24)
 
 
 def drawGaugeBackground(drawingContext, intMin, intMax, strDescriptioin):
@@ -64,9 +64,9 @@ def drawGaugeBackground(drawingContext, intMin, intMax, strDescriptioin):
 	radius = 200
 
 
-	lineWidth = 2
-	context.set_source_rgb(0, 0, 0)
-	context.set_line_width(lineWidth)
+	lineWidth = 4
+	drawingContext.set_source_rgb(0, 0, 0)
+	drawingContext.set_line_width(lineWidth)
 
 	#------------------------------------------
 	#Draw the arc
@@ -84,11 +84,11 @@ def drawGaugeBackground(drawingContext, intMin, intMax, strDescriptioin):
 	angleEndArcRad = ((math.pi*2)/360) * angleEndArcDeg
 
 
-	context.arc(startX, startY, radius, angleStartArcRad, angleEndArcRad)
-	context.stroke()
+	drawingContext.arc(startX, startY, radius, angleStartArcRad, angleEndArcRad)
+	drawingContext.stroke()
 
 	#------------------------------------------
-	#Draw the lines
+	#Draw the lines and labels of the line
 	count = 4
 
 	angleSumDeg = 2 * angleOffsetDeg
@@ -102,31 +102,25 @@ def drawGaugeBackground(drawingContext, intMin, intMax, strDescriptioin):
 		
 		if int(idx/5) == idx/5:
 			length = 20
-			lineWidth = 2
+			lineWidth = 6
 			label = str(int(speedLabel))
 			speedLabel = speedLabel + speedDelta
 		else:
 			length = 10
-			lineWidth = 1
+			lineWidth = 4
 			label = ""
 
-		drawLine(context, startX, startY, radius, rad, length, lineWidth, label)
+		drawLine(drawingContext, startX, startY, radius, rad, length, lineWidth, label)
 		angleDeg = angleDeg - angleDelta
 
 	#------------------------------------------
 	#Write the description
-	context.select_font_face("Georgia", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-	context.set_font_size(24)
-	(x, y, width, height, dx, dy) = context.text_extents(strDescriptioin)
-	context.move_to(startX - width/2, startY - 60)
-	context.show_text(strDescriptioin)
+	drawText(drawingContext, strDescriptioin, (startX, startY - ((radius/8)*5)), 0, "Georgia", 32)
+
 
 	#------------------------------------------
 	#Write the unit
-	context.set_font_size(12)
-	(x, y, width, height, dx, dy) = context.text_extents("[Mbps]") 
-	context.move_to(startX - width/2, startY - 40)
-	context.show_text("[Mbps]")
+	drawText(drawingContext, "[Mbps]", (startX, startY - ((radius/8)*5) + 30), 0, "Georgia", 20)
 
 	#------------------------------------------
 	#Write to the svg
