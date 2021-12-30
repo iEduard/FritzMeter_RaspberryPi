@@ -6,7 +6,7 @@ import adafruit_mcp4725
 import threading
 
 def main():
-    """Main programm"""
+    """Main program"""
 
     SLEEP_TIMER_SECONDS = 1
     MAX_UPLOAD_MBPS = 30        #chose the right maximum upload speed depending on your connection
@@ -28,7 +28,7 @@ def main():
     _valueUpload = 0
     _valueDownload = 0
     uploadTransitionThread = None
-    downlaodTransitionThread = None
+    downloadTransitionThread = None
 
 
     #Start the loop
@@ -36,14 +36,14 @@ def main():
 
 
         try:
-            #Get the Transmission rate from tegh Fr!tz Router           
+            #Get the Transmission rate from the Fr!tz Router           
             _transmissionRate = fc.transmission_rate
 
             #Try to join the Thread if allready existing
             if not (uploadTransitionThread is None): 
                 uploadTransitionThread.join()
-            if not (downlaodTransitionThread is None):
-                downlaodTransitionThread.join()
+            if not (downloadTransitionThread is None):
+                downloadTransitionThread.join()
 
             #Convert to value to set the do dac 
             _valueUpload = convertToAnalogOutput(30, convertToMbps(_transmissionRate[0])) 
@@ -51,11 +51,11 @@ def main():
 
             #Create the threads to performane the transition of the analog gauges
             uploadTransitionThread = threading.Thread(target=transition, args=(dacUpload, _valueUploadOld, _valueUpload, 0.8, "Upload",))
-            downlaodTransitionThread = threading.Thread(target=transition, args=(dacDownload, _valueDownloadOld, _valueDownload, 0.8, "Download",))
+            downloadTransitionThread = threading.Thread(target=transition, args=(dacDownload, _valueDownloadOld, _valueDownload, 0.8, "Download",))
 
             #Start the 
             uploadTransitionThread.start()
-            downlaodTransitionThread.start()
+            downloadTransitionThread.start()
 
             #Save the current value 
             _valueUploadOld = _valueUpload
@@ -64,7 +64,7 @@ def main():
         except:
             #Create an Fritz Status Object
             fc = FritzStatus(address='192.168.178.1', password="")
-            print("Error occured. We will not try again.")
+            print("Error occurred. We will not try again.")
 
 def convertToAnalogOutput(maxMbps, currentMbps):
     """
@@ -90,30 +90,30 @@ def convertToMbps(bytesPerSeconds):
     """
 
     #1 Mega bit per Second (Mbps) = 1 000 000 Bits / Second
-    #First convert to Bit (1 Byte = 8 Bit) Than convert to Mbps by deviding through 1 000 000
+    #First convert to Bit (1 Byte = 8 Bit) Than convert to Mbps by divide with 1´000´000
     return (bytesPerSeconds * 8)/1000000
 
 
-def transition(dac, currentValue, newValue, timneSpan, name):
+def transition(dac, currentValue, newValue, timeSpan, name):
     """
     transition between the analog values
     Do this to prevent jumping pointer
     """
 
-    intItterations = timneSpan/0.1
+    intIterations = timeSpan/0.1
     blnCountUp = False
     lastValue = currentValue
 
     if (lastValue < newValue):
         blnCountUp = True
 
-        valueDiff = (abs(newValue) - abs(lastValue)) / intItterations
+        valueDiff = (abs(newValue) - abs(lastValue)) / intIterations
 
     else:
 
-        valueDiff = (abs(lastValue) - abs(newValue)) / intItterations
+        valueDiff = (abs(lastValue) - abs(newValue)) / intIterations
 
-    for idx in range(int(intItterations)):
+    for idx in range(int(intIterations)):
 
         if blnCountUp:
             currentValue = currentValue + valueDiff
@@ -129,5 +129,5 @@ def transition(dac, currentValue, newValue, timneSpan, name):
 
 if __name__ == '__main__':
 
-    #Start the main programm
+    #Start the main program
     main()
