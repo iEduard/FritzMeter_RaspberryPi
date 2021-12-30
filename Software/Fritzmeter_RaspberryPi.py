@@ -4,6 +4,7 @@ import board
 import busio
 import adafruit_mcp4725
 import threading
+import netifaces
 
 def main():
     """Main program"""
@@ -16,11 +17,13 @@ def main():
     i2c = busio.I2C(board.SCL, board.SDA)
     dacUpload = adafruit_mcp4725.MCP4725(i2c)
     dacDownload = adafruit_mcp4725.MCP4725(i2c, address=0x63)
-    _valueUploadOld = 0
-    _valueDownloadOld = 0
+
+    #Get the ip address from the DHCP Server
+    fritzIpAddress = netifaces.gateways()['default'][netifaces.AF_INET][0]
+
 
     #Create an Fritz Status Object
-    fc = FritzStatus(address='192.168.178.1', password="")
+    fc = FritzStatus(address=fritzIpAddress, password="")
 
     blnLoopActive = True
     _valueUploadOld = 0
