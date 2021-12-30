@@ -1,6 +1,4 @@
-# importing pycairo
-#To install p<cairo we also need teh tependencies of the C Headers: 
-# > brew install cairo pkg-config
+#!/usr/bin/python3
 import cairo
 import math
 
@@ -18,6 +16,10 @@ FONT_LABEL_SIZE = 40
 FONT_DESCRIPTION = "Helvetica"
 FONT_DESCRIPTION_SIZE = 48
 
+
+UPLOAD_AXIS_DEVISION = 6
+DOWNLOAD_AXIS_DEVISION = 4
+
 def main():
 	"""Main programm"""
 
@@ -26,14 +28,14 @@ def main():
 
 		# creating a cairo context object asd asd 
 		context = cairo.Context(surface)
-		drawGaugeBackground(context, MAX_UPLOAD_SPEED, "UP",  6, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y)
+		drawGaugeBackground(context, MAX_UPLOAD_SPEED, "UP",  UPLOAD_AXIS_DEVISION, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y)
 
 	#Draw the download gauge background
 	with cairo.SVGSurface("download.svg", BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y) as surface:
 
 		# creating a cairo context object
 		context = cairo.Context(surface)
-		drawGaugeBackground(context, MAX_DOWNLOAD_SPEED, "DOWN", 4, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y)
+		drawGaugeBackground(context, MAX_DOWNLOAD_SPEED, "DOWN", DOWNLOAD_AXIS_DEVISION, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y)
 
 	# printing message when files are saved
 	print("Files Saved")
@@ -41,6 +43,12 @@ def main():
 
 def drawGaugeBackground(drawingContext, intMax, description, devidedBy, sizeBackgroundX, sizeBackgroundY):
 	"""
+	drawingContext = cairo Drawing context
+	intMax = Maximum Speed in Mbps
+	description = Description of the gauge (e.g. Upload, Download)
+
+
+	--------------------------------
 	Draw the gauge backgrounds
 	"""
 
@@ -209,5 +217,5 @@ def drawText(ctx, string, pos, theta = 0.0, face = 'Georgia', font_size = 18):
 
 if __name__ == '__main__':
 
-	#Start the main programm
+	#Start the main program
 	main()

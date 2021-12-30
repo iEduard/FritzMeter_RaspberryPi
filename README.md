@@ -7,7 +7,7 @@ Application used to show the current usage of the up and downstream on two analo
 # Hardware
 
 - Raspberry Pi Zero W
-- 2x Adafruit MCP4725 12-Bit DAC Tutorial https://learn.adafruit.com/mcp4725-12-bit-dac-tutorial
+- 2x Adafruit MCP4725 12-Bit DAC  https://learn.adafruit.com/mcp4725-12-bit-dac-tutorial
 - 2x 5V Analog gauges
 
 ![Sketch](./Hardware/Sketch.png)
@@ -22,10 +22,18 @@ Here you can set the max up and download speed and print the result.
 
 ![Sketch](./Hardware/Analog_Gauges/download.svg)
 
+### Using the Python Gauge Background generator
+
+Importing pycairo
+To install pycairo we also need the dependencies of the C Headers: 
+
+> brew install cairo pkg-config
+
+
 
 # Software
 
-The application written here is in python.
+The application is written in python.
 
 ## fritzconnection
 
@@ -48,7 +56,7 @@ After installing the latest Raspbian OS from RaspberryPi.org update the systenm 
 
 > sudo apt-get upgrade
 
-## Bibliotheken Istallieren
+## Install the requested libraries
 
 > pip install fritzconnection
 
