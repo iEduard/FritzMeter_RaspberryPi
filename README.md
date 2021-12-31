@@ -48,43 +48,48 @@ To connect with the fr!tz box routers we need an TR-064 libtrary to communicate.
 - Library Definition: https://circuitpython.readthedocs.io/projects/mcp4725/en/latest/api.html
 - Create an SPI object: https://circuitpython.readthedocs.io/en/latest/shared-bindings/busio/index.html#busio.I2C
 
+## netifaces
+
+### Usage / Info
+
+- Library Definition: https://0xbharath.github.io/python-network-programming/libraries/netifaces/index.html
+
 # Pi Konfiguration
 
 After installing the latest Raspbian OS from RaspberryPi.org update the systenm by:
 
-> sudo apt-get update
-
-> sudo apt-get upgrade
+>$ sudo apt-get update
+> 
+>$ sudo apt-get upgrade
 
 ## Install the requested libraries
 
-> pip install fritzconnection
+>$ pip install fritzconnection adafruit-circuitpython-mcp4725 netifaces
 
-> pip install adafruit-circuitpython-mcp4725
 
 ## Create and start service
 
 Source: https://www.nerdynat.com/programming/2019/run-python-on-your-raspberry-pi-as-background-service/
 
-> sudo nano /lib/systemd/system/fritzmeter.service
+>$ sudo nano /lib/systemd/system/fritzmeter.service
 
 Add the text from ./Software/Fritzmeter.service
 Than change the permission
 
-> sudo chmod 644 /lib/systemd/system/fritzmeter.service
+>$ sudo chmod 644 /lib/systemd/system/fritzmeter.service
 
 Reload the system manager configuration
 
-> sudo systemctl daemon-reload
+>$ sudo systemctl daemon-reload
 
 Start the Service
 
-> sudo systemctl start fritzmeter.service
+>$ sudo systemctl start fritzmeter.service
 
 Enable the service to start at boot 
 
-> sudo systemctl enable fritzmeter.service
+>$ sudo systemctl enable fritzmeter.service
 
 So stop the service you can use
 
->  sudo systemctl stop fritzmeter.service
+>$ sudo systemctl stop fritzmeter.service
