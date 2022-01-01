@@ -4,7 +4,7 @@
 
  [Service]
  Type=idle  
- ExecStart=/usr/bin/python /home/pi/git/Software/Fritzmeter_RaspberryPi.py  
+ ExecStart=/usr/bin/python /home/pi/FritzMeter_RaspberryPi/Software/Fritzmeter_RaspberryPi.py  
  User=pi  
 
  [Install]  
