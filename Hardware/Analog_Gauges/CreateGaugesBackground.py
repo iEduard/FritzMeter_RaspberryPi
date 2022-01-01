@@ -3,22 +3,22 @@ import cairo
 import math
 
 #Define the metrics of the gauge
-MAX_DOWNLOAD_SPEED = 200
-MAX_UPLOAD_SPEED = 30
+MAX_DOWNLOAD_SPEED = 200		#Set the max download speed here
+MAX_UPLOAD_SPEED = 30			#Set the max upload speed here
 
-BACKGROUND_SIZE_X = 650
-BACKGROUND_SIZE_Y = 400
+BACKGROUND_SIZE_X = 650			#Fixed background settings. Do not change these.
+BACKGROUND_SIZE_Y = 400			#Fixed background settings. Do not change these.
 
 
 #Define the style of the gauges  
-FONT_LABEL = "Helvetica"
-FONT_LABEL_SIZE = 40
-FONT_DESCRIPTION = "Helvetica"
-FONT_DESCRIPTION_SIZE = 48
+FONT_LABEL = "Helvetica"			#Font of the labels
+FONT_LABEL_SIZE = 40				#Font size of the labels
+FONT_DESCRIPTION = "Helvetica"		#Font of the description
+FONT_DESCRIPTION_SIZE = 48			#Font size of the description
 
 
-UPLOAD_AXIS_DEVISION = 6
-DOWNLOAD_AXIS_DEVISION = 4
+UPLOAD_AXIS_DEVISION = 6			#Divisions of the upload gauges labels
+DOWNLOAD_AXIS_DEVISION = 4			#Divisions of the upload gauges labels
 
 def main():
 	"""Main programm"""
