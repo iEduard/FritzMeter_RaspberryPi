@@ -3,6 +3,7 @@ Application used to show the current usage of the up and downstream on two analo
 
 ![ExampleVideo](./Hardware/Example.gif)
 
+See the detailed instructions here: https://www.instructables.com/Fritzmeter/
 
 # Hardware
 
@@ -29,7 +30,7 @@ To install pycairo we also need the dependencies of the C Headers:
 
 > brew install cairo pkg-config
 
-
+> pip install pycairo
 
 # Software
 
