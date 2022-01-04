@@ -1,51 +1,15 @@
 import time
-
-
-
+from fritzconnection.lib.fritzstatus import FritzStatus
 
 def main():
-    """Main programm"""
-    print("Hello World")
-    print(time.time_ns())
+    """Main program"""
 
-    transition(0, 100, 2)
+    fc = FritzStatus(address="192.168.178.1", password="")
+    _transmissionRate = fc.transmission_rate
+    _maxTransmitionRate = fc.max_bit_rate
 
-
-
-def transition(dac, lastValue, newValue, timneSpan):
-    """
-    transition between the analog values
-    Do this to prevent jumping pointer
-    """
-
-    intItterations = timneSpan/0.1
-    blnCountUp = False
-    currentValue = lastValue
-    print("Iterations: " + str(intItterations) + "  " + str(currentValue) + " ")
-
-
-    if (lastValue < newValue):
-        blnCountUp = True
-
-        valueDiff = (abs(newValue) - abs(lastValue)) / intItterations
-
-    else:
-
-        valueDiff = (abs(lastValue) - abs(newValue)) / intItterations
-
-    for idx in range(int(intItterations)):
-
-        print(str(idx))
-        if blnCountUp:
-            currentValue = currentValue + valueDiff
-        else:
-            currentValue = currentValue - valueDiff
-    
-        print(str(currentValue))
-        dac.value = currentValue
-        time.sleep(0.1)
-    
-
+    print("Upload: " + str(_transmissionRate[0]) + " Max Rate: " + str(_maxTransmitionRate[0]/1000000))
+    print("Download: " + str(_transmissionRate[1]) + " Max Rate: " + str(_maxTransmitionRate[1]/1000000))
 
 if __name__ == '__main__':
 
