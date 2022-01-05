@@ -1,0 +1,4 @@
+pycairo
+fritzconnection 
+adafruit-circuitpython-mcp4725 
+netifaces
