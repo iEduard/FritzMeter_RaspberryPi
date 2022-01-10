@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 import cairo
 import math
+import pathlib
+
+UPLOAD_FILE_NAME = "upload.svg"
+DOWNLOAD_FILE_NAME = "download.svg"
 
 #Define the metrics of the gauge
 MAX_DOWNLOAD_SPEED = 200		#Set the max download speed here
@@ -23,19 +27,28 @@ DOWNLOAD_AXIS_DEVISION = 4			#Divisions of the upload gauges labels
 def main():
 	"""Main programm"""
 
+	#Get the current folder of the script
+	file_path = str(pathlib.Path(__file__).parent.resolve())
+
 	#Draw the upload gauge background
-	with cairo.SVGSurface("upload.svg", BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y) as surface:
+	with cairo.SVGSurface(UPLOAD_FILE_NAME, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y) as surface:
 
 		# creating a cairo context object asd asd 
 		context = cairo.Context(surface)
 		drawGaugeBackground(context, MAX_UPLOAD_SPEED, "UP",  UPLOAD_AXIS_DEVISION, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y)
 
+	print("Upload File saved here:")
+	print(file_path + "/" + UPLOAD_FILE_NAME)
+
 	#Draw the download gauge background
-	with cairo.SVGSurface("download.svg", BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y) as surface:
+	with cairo.SVGSurface(DOWNLOAD_FILE_NAME, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y) as surface:
 
 		# creating a cairo context object
 		context = cairo.Context(surface)
 		drawGaugeBackground(context, MAX_DOWNLOAD_SPEED, "DOWN", DOWNLOAD_AXIS_DEVISION, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y)
+
+	print("Downlaod File saved here:")
+	print(file_path + "/" + DOWNLOAD_FILE_NAME)
 
 	# printing message when files are saved
 	print("Files Saved")
