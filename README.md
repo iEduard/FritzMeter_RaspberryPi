@@ -15,22 +15,55 @@ See the detailed instructions here: https://www.instructables.com/Fritzmeter/
 
 ## Gauges Background
 
-The Background of the gauges can be created by the Hardware/Analog Gauges/CreateGaugesBackground.py Python Skript.
+The Background of the gauges can be created by the Hardware/Analog Gauges/CreateGaugesBackground.py Python script.
 
-Here there will be two svg files be created- One for the up and one for the download.
-
-Here you can set the max up and download speed and print the result. 
+There will be two svg files created. One for the up and one for the download. The script can be edited to suit the network settings.
 
 ![Sketch](./Hardware/Analog_Gauges/download.svg)
 
 ### Using the Python Gauge Background generator
 
-Importing pycairo
-To install pycairo we also need the dependencies of the C Headers: 
+#### Importing the needed libraries
+
+To install pycairo we also need the dependencies of the C Headers. For mac os use:
 
 > brew install cairo pkg-config
 
+For other os´s check this article: https://pycairo.readthedocs.io/en/latest/getting_started.html
+
+After installing the requested c-headers we can install pycairo.
+
 > pip install pycairo
+
+running the python script will create an output and show the file path of the two created files.
+
+> python3 CreateGaugesBackground.py \
+> Upload File saved here:/Users/esc/Git/FritzMeter_RaspberryPi/Hardware/upload.svg \
+> Download File saved here:/Users/esc/Git/FritzMeter_RaspberryPi/Hardware/download.svg \
+> Done
+
+The output can be changed with the global constants ad the top
+
+    UPLOAD_FILE_NAME = "upload.svg"
+    DOWNLOAD_FILE_NAME = "download.svg"
+
+    #Define the metrics of the gauge
+    MAX_DOWNLOAD_SPEED = 200		#Set the max download speed here
+    MAX_UPLOAD_SPEED = 30			#Set the max upload speed here
+
+    BACKGROUND_SIZE_X = 650			#Fixed background settings. Do not change these.
+    BACKGROUND_SIZE_Y = 400			#Fixed background settings. Do not change these.
+
+
+    #Define the style of the gauges  
+    FONT_LABEL = "Helvetica"			#Font of the labels
+    FONT_LABEL_SIZE = 40				#Font size of the labels
+    FONT_DESCRIPTION = "Helvetica"		#Font of the description
+    FONT_DESCRIPTION_SIZE = 48			#Font size of the description
+
+
+    UPLOAD_AXIS_DEVISION = 6			#Divisions of the upload gauges labels
+    DOWNLOAD_AXIS_DEVISION = 4			#Divisions of the upload gauges labels
 
 # Software
 

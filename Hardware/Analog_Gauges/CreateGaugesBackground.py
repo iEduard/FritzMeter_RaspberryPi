@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 import cairo
 import math
+import pathlib
+import os
+
+UPLOAD_FILE_NAME = "upload.svg"
+DOWNLOAD_FILE_NAME = "download.svg"
 
 #Define the metrics of the gauge
 MAX_DOWNLOAD_SPEED = 200		#Set the max download speed here
@@ -21,35 +26,58 @@ UPLOAD_AXIS_DEVISION = 6			#Divisions of the upload gauges labels
 DOWNLOAD_AXIS_DEVISION = 4			#Divisions of the upload gauges labels
 
 def main():
-	"""Main programm"""
+	"""Main program"""
 
+	#Get the current folder of the script
+	scriptPath = str(pathlib.Path(__file__).parent.resolve())
+
+	#---- upload -----
 	#Draw the upload gauge background
-	with cairo.SVGSurface("upload.svg", BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y) as surface:
+	with cairo.SVGSurface(UPLOAD_FILE_NAME, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y) as surface:
 
 		# creating a cairo context object asd asd 
 		context = cairo.Context(surface)
 		drawGaugeBackground(context, MAX_UPLOAD_SPEED, "UP",  UPLOAD_AXIS_DEVISION, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y)
 
+	#Set the Information to the user where to find the upload background
+	if (os.path.isabs(UPLOAD_FILE_NAME)):
+		filePath = UPLOAD_FILE_NAME
+	else:
+		filePath = scriptPath + "/" + UPLOAD_FILE_NAME
+
+	print("Upload File saved here:" + filePath)
+
+	#---- download -----
 	#Draw the download gauge background
-	with cairo.SVGSurface("download.svg", BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y) as surface:
+	with cairo.SVGSurface(DOWNLOAD_FILE_NAME, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y) as surface:
 
 		# creating a cairo context object
 		context = cairo.Context(surface)
 		drawGaugeBackground(context, MAX_DOWNLOAD_SPEED, "DOWN", DOWNLOAD_AXIS_DEVISION, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y)
 
+	#Set the Information to the user where to find the download background
+	if (os.path.isabs(DOWNLOAD_FILE_NAME)):
+		filePath = DOWNLOAD_FILE_NAME
+	else:
+		filePath = scriptPath + "/" + DOWNLOAD_FILE_NAME
+
+	print("Download File saved here:" + filePath)
+
+
+	#---- done -----
 	# printing message when files are saved
-	print("Files Saved")
+	print("Done")
 
 
-def drawGaugeBackground(drawingContext, intMax, description, devidedBy, sizeBackgroundX, sizeBackgroundY):
+def drawGaugeBackground(drawingContext, intMax, description, dividedBy, sizeBackgroundX, sizeBackgroundY):
 	"""
-	drawingContext = cairo Drawing context
-	intMax = Maximum Speed in Mbps
-	description = Description of the gauge (e.g. Upload, Download)
-
-
-	--------------------------------
-	Draw the gauge backgrounds
+	## Draw the gauge backgrounds
+	- drawingContext = cairo Drawing context
+	- intMax = Maximum Speed in Mbps
+	- description = Description of the gauge (e.g. Upload, Download)
+	- dividedBy = Set the devision of the gauge background
+	- sizeBackgroundX = The with of the background
+	- sizeBackgroundY = The hight of teh background
 	"""
 
 	startX = sizeBackgroundX/2
@@ -130,7 +158,7 @@ def drawGaugeBackground(drawingContext, intMax, description, devidedBy, sizeBack
 
 	#------------------------------------------
 	#Draw the lines and labels of the line
-	count = devidedBy
+	count = dividedBy
 
 	angleSumDeg = 2 * angleOffsetDeg
 	angleDelta = angleSumDeg / (count * 5)
@@ -167,7 +195,16 @@ def drawGaugeBackground(drawingContext, intMax, description, devidedBy, sizeBack
 
 def drawLine(context, startX, startY, radius, angle, lineLength, lineWidth, label):
 	"""
-	Draw the lines on the arc
+	## Draw the lines on the arc
+	- context = cairo context
+	- startX = Startposition x
+	- startY = Startposition y
+	- radius = radius of the arc
+	- angle = Angle of the line
+	- lineLength = length of the line
+	- lineWidth = width of the line
+	- label = Label of the line
+
 	"""
 	context.set_line_width(lineWidth)
 
@@ -196,23 +233,32 @@ def drawLine(context, startX, startY, radius, angle, lineLength, lineWidth, labe
 
 		drawText(context, label, (startX - delta_x2, startY - delta_y2), (2 * math.pi) - angle, FONT_LABEL, FONT_LABEL_SIZE)
 
-def drawText(ctx, string, pos, theta = 0.0, face = 'Georgia', font_size = 18):
-	ctx.save()
+def drawText(context, text, pos, theta = 0.0, font = 'Georgia', font_size = 18):
+	"""
+	## Draw text on context
+	- context = cairo context
+	- text = Text to draw
+	- pos = position of the text as tuple [x-pos, y-pos]
+	- theta = angle of the text
+	- font = Used font to write the text on the context
+	- font_size = size of the text font	
+	"""
+	context.save()
 
 	# build up an appropriate font
-	ctx.select_font_face(face , cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-	ctx.set_font_size(font_size)
-	fascent, fdescent, fheight, fxadvance, fyadvance = ctx.font_extents()
-	x_off, y_off, tw, th = ctx.text_extents(string)[:4]
+	context.select_font_face(font , cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+	context.set_font_size(font_size)
+	fascent, fdescent, fheight, fxadvance, fyadvance = context.font_extents()
+	x_off, y_off, tw, th = context.text_extents(text)[:4]
 	nx = -tw/2.0
 	ny = fheight/2
 
-	ctx.translate(pos[0], pos[1])
-	ctx.rotate(theta)
-	ctx.translate(nx, ny)
-	ctx.move_to(0,0)
-	ctx.show_text(string)
-	ctx.restore()
+	context.translate(pos[0], pos[1])
+	context.rotate(theta)
+	context.translate(nx, ny)
+	context.move_to(0,0)
+	context.show_text(text)
+	context.restore()
 
 
 if __name__ == '__main__':
