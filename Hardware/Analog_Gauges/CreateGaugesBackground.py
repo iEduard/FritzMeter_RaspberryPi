@@ -2,6 +2,7 @@
 import cairo
 import math
 import pathlib
+import os
 
 UPLOAD_FILE_NAME = "upload.svg"
 DOWNLOAD_FILE_NAME = "download.svg"
@@ -25,11 +26,12 @@ UPLOAD_AXIS_DEVISION = 6			#Divisions of the upload gauges labels
 DOWNLOAD_AXIS_DEVISION = 4			#Divisions of the upload gauges labels
 
 def main():
-	"""Main programm"""
+	"""Main program"""
 
 	#Get the current folder of the script
-	file_path = str(pathlib.Path(__file__).parent.resolve())
+	scriptPath = str(pathlib.Path(__file__).parent.resolve())
 
+	#---- upload -----
 	#Draw the upload gauge background
 	with cairo.SVGSurface(UPLOAD_FILE_NAME, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y) as surface:
 
@@ -37,8 +39,15 @@ def main():
 		context = cairo.Context(surface)
 		drawGaugeBackground(context, MAX_UPLOAD_SPEED, "UP",  UPLOAD_AXIS_DEVISION, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y)
 
-	print("Upload File saved here:" + file_path + "/" + UPLOAD_FILE_NAME)
+	#Set the Information to the user where to find the upload background
+	if (os.path.isabs(UPLOAD_FILE_NAME)):
+		filePath = UPLOAD_FILE_NAME
+	else:
+		filePath = scriptPath + "/" + UPLOAD_FILE_NAME
 
+	print("Upload File saved here:" + filePath)
+
+	#---- download -----
 	#Draw the download gauge background
 	with cairo.SVGSurface(DOWNLOAD_FILE_NAME, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y) as surface:
 
@@ -46,10 +55,18 @@ def main():
 		context = cairo.Context(surface)
 		drawGaugeBackground(context, MAX_DOWNLOAD_SPEED, "DOWN", DOWNLOAD_AXIS_DEVISION, BACKGROUND_SIZE_X, BACKGROUND_SIZE_Y)
 
-	print("Downlaod File saved here:" + file_path + "/" + DOWNLOAD_FILE_NAME)
+	#Set the Information to the user where to find the download background
+	if (os.path.isabs(DOWNLOAD_FILE_NAME)):
+		filePath = DOWNLOAD_FILE_NAME
+	else:
+		filePath = scriptPath + "/" + DOWNLOAD_FILE_NAME
 
+	print("Download File saved here:" + filePath)
+
+
+	#---- done -----
 	# printing message when files are saved
-	print("Files Saved")
+	print("Done")
 
 
 def drawGaugeBackground(drawingContext, intMax, description, dividedBy, sizeBackgroundX, sizeBackgroundY):
