@@ -1,11 +1,11 @@
 from gpiozero import Button, LED
 
+while True:
+    #Init the button
+    button = Button(27)
 
-#Initialisierung von GPIO27 als Button (Eingang)
-button = Button(27)
+    #Init the led
+    led = LED(17)
 
-#Initialisierung von GPIO17 als LED (Ausgang)
-led = LED(17)
-
-#Wen der Button gedrückt wird
-button.when_pressed = led.toggle
+    #link the button pressed event to the led toggle function
+    button.when_pressed = led.toggle
