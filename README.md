@@ -127,3 +127,24 @@ Enable the service to start at boot
 So stop the service you can use
 
 >$ sudo systemctl stop fritzmeter.service
+
+## Add the Background Light Script
+
+>$ sudo nano /lib/systemd/system/Background_Light.service
+
+Add the text from ./Software/Background_Light.service
+Than change the permission
+
+>$ sudo chmod 644 /lib/systemd/system/Background_Light.service
+
+Reload the system manager configuration
+
+>$ sudo systemctl daemon-reload
+
+Start the Service
+
+>$ sudo systemctl start Background_Light.service
+
+Enable the service to start at boot 
+
+>$ sudo systemctl enable Background_Light.service
