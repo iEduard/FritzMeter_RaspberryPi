@@ -1,0 +1,11 @@
+ [Unit]
+ Description=Background_Light Service
+ After=multi-user.target
+
+ [Service]
+ Type=idle  
+ ExecStart=/usr/bin/python /home/pi/FritzMeter_RaspberryPi/Software/Background_Light.py  
+ User=pi  
+
+ [Install]  
+ WantedBy=multi-user.target
