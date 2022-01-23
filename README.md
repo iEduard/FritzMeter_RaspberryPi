@@ -128,7 +128,17 @@ So stop the service you can use
 
 >$ sudo systemctl stop fritzmeter.service
 
-## Add the Background Light Script
+# Background light
+
+Additionally you can add an led backlight and control it with an button. In the script the button ist set to Pin 17 and the led's on pin 18 and 27.
+
+![Sketch](./Hardware/BackgroundLed_Sketch_Schaltplan.png)
+
+The requested _gpiozero_ lib should be installed with the pi os. If not you can add it with:
+
+> pip install gpiozero
+
+## Add the service for the Background light control
 
 >$ sudo nano /lib/systemd/system/Background_Light.service
 

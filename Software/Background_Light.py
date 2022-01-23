@@ -9,12 +9,14 @@ def toggleLed():
     This should prevent the led to be turned off from an bouncing button or switch
     """
 
-    led.toggle()
+    ledUp.toggle()
+    ledDown.toggle()
     sleep(0.2)
 
 
-button = Button(2)  #Init the button
-led = LED(18)       #Init the led
+button = Button(17)  #Init the button
+ledUp = LED(18)       #Init the led
+ledDown = LED(27)       #Init the led
 
 button.when_pressed = toggleLed #Link the toggleLed funktion to button pressed
 
